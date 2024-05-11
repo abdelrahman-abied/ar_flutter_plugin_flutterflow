@@ -1,5 +1,4 @@
 import 'dart:math' show sqrt;
-import 'dart:typed_data';
 
 import 'package:ar_flutter_plugin_flutterflow/datatypes/config_planedetection.dart';
 import 'package:ar_flutter_plugin_flutterflow/models/ar_anchor.dart';
@@ -37,8 +36,7 @@ class ARSessionManager {
   /// Callback that is triggered once error is triggered
   ErrorHandler? onError;
 
-  ARSessionManager(int id, this.buildContext, this.planeDetectionConfig,
-      {this.debug = false}) {
+  ARSessionManager(int id, this.buildContext, this.planeDetectionConfig, {this.debug = false}) {
     _channel = MethodChannel('arsession_$id');
     _channel.setMethodCallHandler(_platformCallHandler);
     if (debug) {
@@ -49,8 +47,7 @@ class ARSessionManager {
   /// Returns the camera pose in Matrix4 format with respect to the world coordinate system of the [ARView]
   Future<Matrix4?> getCameraPose() async {
     try {
-      final serializedCameraPose =
-          await _channel.invokeMethod<List<dynamic>>('getCameraPose', {});
+      final serializedCameraPose = await _channel.invokeMethod<List<dynamic>>('getCameraPose', {});
       return MatrixConverter().fromJson(serializedCameraPose!);
     } catch (e) {
       print('Error caught: ' + e.toString());
@@ -64,8 +61,7 @@ class ARSessionManager {
       if (anchor.name.isEmpty) {
         throw Exception("Anchor can not be resolved. Anchor name is empty.");
       }
-      final serializedCameraPose =
-          await _channel.invokeMethod<List<dynamic>>('getAnchorPose', {
+      final serializedCameraPose = await _channel.invokeMethod<List<dynamic>>('getAnchorPose', {
         "anchorId": anchor.name,
       });
       return MatrixConverter().fromJson(serializedCameraPose!);
@@ -76,8 +72,7 @@ class ARSessionManager {
   }
 
   /// Returns the distance in meters between @anchor1 and @anchor2.
-  Future<double?> getDistanceBetweenAnchors(
-      ARAnchor anchor1, ARAnchor anchor2) async {
+  Future<double?> getDistanceBetweenAnchors(ARAnchor anchor1, ARAnchor anchor2) async {
     var anchor1Pose = await getPose(anchor1);
     var anchor2Pose = await getPose(anchor2);
     var anchor1Translation = anchor1Pose?.getTranslation();
@@ -131,22 +126,20 @@ class ARSessionManager {
           if (onError != null) {
             onError!(call.arguments[0]);
             print(call.arguments);
-          }
-          else{
-            ScaffoldMessenger.of(buildContext).showSnackBar(SnackBar(
-                content: Text(call.arguments[0]),
-                action: SnackBarAction(
-                    label: 'HIDE',
-                    onPressed:
-                    ScaffoldMessenger.of(buildContext).hideCurrentSnackBar)));
+          } else {
+            if (debug)
+              ScaffoldMessenger.of(buildContext).showSnackBar(SnackBar(
+                  content: Text(call.arguments[0]),
+                  action: SnackBarAction(
+                      label: 'HIDE',
+                      onPressed: ScaffoldMessenger.of(buildContext).hideCurrentSnackBar)));
           }
           break;
         case 'onPlaneOrPointTap':
           if (onPlaneOrPointTap != null) {
             final rawHitTestResults = call.arguments as List<dynamic>;
             final serializedHitTestResults = rawHitTestResults
-                .map(
-                    (hitTestResult) => Map<String, dynamic>.from(hitTestResult))
+                .map((hitTestResult) => Map<String, dynamic>.from(hitTestResult))
                 .toList();
             final hitTestResults = serializedHitTestResults.map((e) {
               return ARHitTestResult.fromJson(e);
@@ -199,7 +192,6 @@ class ARSessionManager {
       'handleRotation': handleRotation,
     });
   }
-
 
   /// Dispose the AR view on the platforms to pause the scenes and disconnect the platform handlers.
   /// You should call this before removing the AR view to prevent out of memory erros
